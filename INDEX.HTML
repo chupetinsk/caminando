@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Aceptas flores?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF8E9;
+    --cream-deep:#FBEFCF;
+    --petal:#F6C445;
+    --petal-deep:#E8A93C;
+    --center:#B5651D;
+    --leaf:#5C7A4B;
+    --leaf-deep:#3F5734;
+    --ink:#3B2F1E;
+    --ink-soft:#6B5C42;
+    --paper:#E4C99C;
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *{ box-sizing: border-box; }
+
+  html, body{
+    height:100%;
+    margin:0;
+    overflow:hidden;
+    background: var(--cream);
+    font-family:'Nunito', ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink);
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#211B10;
+      --cream-deep:#2B2313;
+      --ink:#F6ECD4;
+      --ink-soft:#CBB98F;
+      --paper:#7A5C33;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#211B10;
+    --cream-deep:#2B2313;
+    --ink:#F6ECD4;
+    --ink-soft:#CBB98F;
+    --paper:#7A5C33;
+  }
+
+  body{
+    background: radial-gradient(circle at 20% 15%, var(--cream-deep), var(--cream) 60%);
+  }
+
+  .screen{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:1;
+    transition: opacity .55s ease;
+  }
+  .screen.hidden{
+    opacity:0;
+    pointer-events:none;
+  }
+
+  /* ---------- Pantalla 1 ---------- */
+  #bg-blooms{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  #bg-blooms span{
+    position:absolute;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--petal), var(--petal-deep) 70%);
+    opacity:.35;
+    filter: blur(1px);
+  }
+
+  .ask-card{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    max-width:min(90vw, 460px);
+    padding: 0 1rem;
+  }
+  .eyebrow-flower{
+    font-size: 2.6rem;
+    line-height:1;
+    margin-bottom: .6rem;
+    display:inline-block;
+  }
+  h1{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    font-style:italic;
+    font-size: clamp(2rem, 7vw, 3.1rem);
+    margin: 0 0 .5rem;
+    color: var(--ink);
+  }
+  .ask-sub{
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    margin: 0 0 2.2rem;
+    line-height:1.5;
+  }
+
+  .btn-row{
+    position:relative;
+    display:flex;
+    gap: 1rem;
+    justify-content:center;
+    align-items:center;
+    min-height: 64px;
+  }
+
+  button{
+    font-family:'Nunito', sans-serif;
+    font-weight:700;
+    font-size: 1.05rem;
+    border:none;
+    border-radius: 999px;
+    cursor:pointer;
+    padding: .95rem 2.1rem;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  button:focus-visible{
+    outline: 3px solid var(--center);
+    outline-offset: 3px;
+  }
+
+  #btn-si{
+    background: linear-gradient(135deg, var(--petal), var(--petal-deep));
+    color: #4A2F0A;
+    box-shadow: 0 8px 20px rgba(184,120,20,.35);
+    transform: scale(var(--si-scale, 1));
+  }
+  #btn-si:hover{ transform: scale(calc(var(--si-scale, 1) * 1.05)); }
+  #btn-si:active{ transform: scale(calc(var(--si-scale, 1) * .97)); }
+
+  #btn-no{
+    background: var(--cream-deep);
+    color: var(--ink-soft);
+    border: 1.5px solid rgba(107,92,66,.25);
+    position: fixed;
+    left: auto; top: auto;
+    z-index: 5;
+  }
+
+  .dodge-caption{
+    position:absolute;
+    bottom: -2.4rem;
+    left:0; right:0;
+    text-align:center;
+    font-size: .85rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    min-height: 1.2em;
+  }
+
+  /* ---------- Pantalla 2 ---------- */
+  #screen-bouquet{
+    flex-direction: column;
+    background: radial-gradient(circle at 50% 20%, var(--cream-deep), var(--cream) 65%);
+  }
+  .bouquet-head{
+    text-align:center;
+    padding: 1.4rem 1rem 0;
+    z-index:2;
+  }
+  .bouquet-head h2{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    margin: 0 0 .25rem;
+  }
+  .bouquet-head p{
+    margin:0;
+    color: var(--ink-soft);
+    font-size: .95rem;
+  }
+  #canvas-wrap{
+    flex:1;
+    width:100%;
+    position:relative;
+    touch-action: none;
+    cursor: grab;
+  }
+  #canvas-wrap:active{ cursor: grabbing; }
+  #canvas-wrap canvas{ display:block; width:100%; height:100%; }
+
+  #hint{
+    position:absolute;
+    bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
+    left:0; right:0;
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: .85rem;
+    opacity:.85;
+    pointer-events:none;
+  }
+
+  #loading3d{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: var(--ink-soft);
+    font-size: .95rem;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .screen{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ---------- Pantalla 1: pregunta ---------- -->
+<div class="screen" id="screen-ask">
+  <div id="bg-blooms"></div>
+  <div class="ask-card">
+    <span class="eyebrow-flower">🌼</span>
+    <h1>¿Aceptas flores?</h1>
+    <p class="ask-sub">Un ramo de margaritas amarillas te está esperando.</p>
+    <div class="btn-row">
+      <button id="btn-si">Sí</button>
+      <button id="btn-no">No</button>
+      <div class="dodge-caption" id="dodge-caption"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Pantalla 2: ramo 3D ---------- -->
+<div class="screen hidden" id="screen-bouquet">
+  <div class="bouquet-head">
+    <h2>Aquí tienes tus flores 🌼</h2>
+    <p>Arrástralas con el dedo o el mouse para girarlas</p>
+  </div>
+  <div id="canvas-wrap">
+    <div id="loading3d">preparando el ramo…</div>
+  </div>
+  <div id="hint">toca y arrastra ↔</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ============ Pantalla 1: botón No esquivo ============ */
+  var btnNo = document.getElementById('btn-no');
+  var btnSi = document.getElementById('btn-si');
+  var askScreen = document.getElementById('screen-ask');
+  var caption = document.getElementById('dodge-caption');
+  var dodges = 0;
+
+  var captions = [
+    "¿Seguro que no?",
+    "Inténtalo otra vez…",
+    "Casi la agarras 😏",
+    "Las flores insisten",
+    "No se deja atrapar",
+    "Sigue intentando 🌼",
+    "Cada vez más lejos…"
+  ];
+
+  function placeNoRandomly(){
+    var rect = btnNo.getBoundingClientRect();
+    var w = rect.width || 100;
+    var h = rect.height || 50;
+    var margin = 16;
+    var safeTop = margin + 60; // deja espacio para el título
+    var maxX = Math.max(margin, window.innerWidth - w - margin);
+    var maxY = Math.max(safeTop, window.innerHeight - h - margin);
+    var x = margin + Math.random() * (maxX - margin);
+    var y = safeTop + Math.random() * (maxY - safeTop);
+    btnNo.style.left = x + 'px';
+    btnNo.style.top = y + 'px';
+
+    dodges++;
+    var scale = Math.min(1 + dodges * 0.045, 1.6);
+    askScreen.style.setProperty('--si-scale', scale.toFixed(3));
+    caption.textContent = captions[Math.min(dodges - 1, captions.length - 1)];
+  }
+
+  ['mouseenter', 'touchstart', 'pointerdown', 'focus'].forEach(function(evt){
+    btnNo.addEventListener(evt, function(e){
+      e.preventDefault();
+      placeNoRandomly();
+    }, { passive: false });
+  });
+  // Failsafe: si de casualidad logra hacer click, igual esquiva y no acepta nada.
+  btnNo.addEventListener('click', function(e){
+    e.preventDefault();
+    placeNoRandomly();
+  });
+
+  btnSi.addEventListener('click', function(){
+    document.getElementById('screen-ask').classList.add('hidden');
+    var bq = document.getElementById('screen-bouquet');
+    bq.classList.remove('hidden');
+    initBouquet();
+  });
+
+  /* decorative background blooms */
+  (function(){
+    var wrap = document.getElementById('bg-blooms');
+    var n = 10;
+    for (var i = 0; i < n; i++){
+      var s = document.createElement('span');
+      var size = 40 + Math.random() * 90;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top = (Math.random() * 100) + '%';
+      wrap.appendChild(s);
+    }
+  })();
+
+  /* ============ Pantalla 2: ramo 3D ============ */
+  var bouquetInited = false;
+
+  function initBouquet(){
+    if (bouquetInited) return;
+    bouquetInited = true;
+
+    var wrap = document.getElementById('canvas-wrap');
+    var loading = document.getElementById('loading3d');
+
+    var scene = new THREE.Scene();
+
+    var camera = new THREE.PerspectiveCamera(40, wrap.clientWidth / wrap.clientHeight, 0.1, 100);
+    camera.position.set(0, 1.5, 12.5);
+
+    var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+    renderer.setClearColor(0x000000, 0);
+    wrap.appendChild(renderer.domElement);
+    loading.style.display = 'none';
+
+    // luces
+    scene.add(new THREE.AmbientLight(0xfff3d6, 0.75));
+    var dir = new THREE.DirectionalLight(0xfff0c8, 0.9);
+    dir.position.set(4, 6, 5);
+    scene.add(dir);
+    var fill = new THREE.DirectionalLight(0xffe9b8, 0.35);
+    fill.position.set(-5, 2, -3);
+    scene.add(fill);
+
+    var bouquet = new THREE.Group();
+    scene.add(bouquet);
+
+    var COLORS = {
+      petal: [0xF6C445, 0xF5B83A, 0xFAD268, 0xF2BE3D, 0xEFAE2E],
+      petalPale: [0xFCE7A6, 0xF7D77E],
+      center: [0xB5651D, 0x9C5518, 0xC17324, 0x8A4A14],
+      leaf: [0x5C7A4B, 0x4E6B3F, 0x6B8956, 0x466036],
+      filler: [0xFDF7E6, 0xF7EFD2],
+      stem: 0x4E6B3F,
+      paper: 0xE4C99C
+    };
+
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+    // pétalo individual reutilizable, con leve curvatura simulada por escala
+    function addPetalRing(flower, mat, count, radius, length, width, tiltUp, jitter){
+      var petalGeo = new THREE.SphereGeometry(0.17, 7, 7);
+      var offset = Math.random() * Math.PI * 2;
+      for (var i = 0; i < count; i++){
+        var petal = new THREE.Mesh(petalGeo, mat);
+        petal.scale.set(width, length, 0.12);
+        var angle = offset + (i / count) * Math.PI * 2;
+        petal.position.set(
+          Math.cos(angle) * radius,
+          Math.sin(angle) * radius * 0.12 + tiltUp * 0.05,
+          Math.sin(angle) * radius
+        );
+        petal.rotation.z = angle + Math.PI / 2;
+        petal.rotation.x = tiltUp + (Math.random() - 0.5) * jitter;
+        flower.add(petal);
+      }
+    }
+
+    // flor grande de dos capas de pétalos (margarita frondosa)
+    function makeFlower(size){
+      size = size || 1;
+      var flower = new THREE.Group();
+
+      var centerGeo = new THREE.SphereGeometry(0.15 * size, 14, 14);
+      var centerMat = new THREE.MeshStandardMaterial({ color: pick(COLORS.center), roughness: 0.65, metalness: 0.04 });
+      var center = new THREE.Mesh(centerGeo, centerMat);
+      center.scale.set(1, 0.7, 1);
+      flower.add(center);
+
+      var petalColor = pick(COLORS.petal);
+      var petalMat = new THREE.MeshStandardMaterial({ color: petalColor, roughness: 0.5, metalness: 0.02, side: THREE.DoubleSide });
+      var petalMatPale = new THREE.MeshStandardMaterial({ color: pick(COLORS.petalPale), roughness: 0.5, metalness: 0.02, side: THREE.DoubleSide });
+
+      // capa exterior: pétalos largos
+      addPetalRing(flower, petalMat, 13 + Math.floor(Math.random() * 3), 0.36 * size, 1.65 * size, 0.44 * size, 0.18, 0.12);
+      // capa interior: pétalos más cortos y erguidos, dan volumen
+      addPetalRing(flower, petalMatPale, 9 + Math.floor(Math.random() * 3), 0.22 * size, 1.05 * size, 0.36 * size, 0.55, 0.18);
+
+      return flower;
+    }
+
+    // florecilla pequeña de relleno (tipo manzanilla), da densidad al ramo
+    function makeFillerFlower(){
+      var flower = new THREE.Group();
+      var size = 0.42 + Math.random() * 0.18;
+
+      var centerGeo = new THREE.SphereGeometry(0.075, 10, 10);
+      var centerMat = new THREE.MeshStandardMaterial({ color: 0xE0A83A, roughness: 0.6 });
+      var center = new THREE.Mesh(centerGeo, centerMat);
+      flower.add(center);
+
+      var petalMat = new THREE.MeshStandardMaterial({ color: pick(COLORS.filler), roughness: 0.55, side: THREE.DoubleSide });
+      addPetalRing(flower, petalMat, 8, 0.17, 0.55, 0.22, 0.2, 0.15);
+
+      flower.scale.setScalar(size);
+      return flower;
+    }
+
+    function makeLeaf(scale){
+      scale = scale || 1;
+      var leafGeo = new THREE.SphereGeometry(0.18, 8, 8);
+      var leafMat = new THREE.MeshStandardMaterial({ color: pick(COLORS.leaf), roughness: 0.7 });
+      var leaf = new THREE.Mesh(leafGeo, leafMat);
+      leaf.scale.set(0.32 * scale, 1.4 * scale, 0.08 * scale);
+      return leaf;
+    }
+
+    // pequeño manojo de follaje fino (verde de relleno)
+    function makeSprig(){
+      var sprig = new THREE.Group();
+      var n = 3 + Math.floor(Math.random() * 3);
+      for (var i = 0; i < n; i++){
+        var leaf = makeLeaf(0.5 + Math.random() * 0.25);
+        var a = (i / n) * Math.PI * 2;
+        leaf.position.set(Math.cos(a) * 0.06, i * 0.09, Math.sin(a) * 0.06);
+        leaf.rotation.z = (Math.random() - 0.5) * 1.4;
+        leaf.rotation.x = (Math.random() - 0.5) * 0.6;
+        sprig.add(leaf);
+      }
+      return sprig;
+    }
+
+    // papel de envoltura (cono abierto, más ancho para un ramo grande)
+    var paperGeo = new THREE.ConeGeometry(2.15, 3.9, 40, 1, true);
+    var paperMat = new THREE.MeshStandardMaterial({
+      color: COLORS.paper,
+      roughness: 0.85,
+      metalness: 0.0,
+      side: THREE.DoubleSide
+    });
+    var paper = new THREE.Mesh(paperGeo, paperMat);
+    paper.position.y = -3.35;
+    bouquet.add(paper);
+
+    var paperTopGeo = new THREE.CircleGeometry(2.15, 40);
+    var paperTop = new THREE.Mesh(paperTopGeo, paperMat);
+    paperTop.rotation.x = -Math.PI / 2;
+    paperTop.position.y = -1.42;
+    bouquet.add(paperTop);
+
+    // lazo
+    var ribbonGeo = new THREE.TorusGeometry(0.72, 0.075, 8, 28);
+    var ribbonMat = new THREE.MeshStandardMaterial({ color: 0xC98B3B, roughness: 0.5 });
+    var ribbon = new THREE.Mesh(ribbonGeo, ribbonMat);
+    ribbon.rotation.x = Math.PI / 2;
+    ribbon.position.y = -2.0;
+    bouquet.add(ribbon);
+
+    // ---- tallos + flores dispuestos en cúpula (arreglo denso y redondo) ----
+    var stemMat = new THREE.MeshStandardMaterial({ color: COLORS.stem, roughness: 0.7 });
+
+    function addStem(angle, radialOffset, height, flowerNode, flowerScale, leafChance){
+      var stemGroup = new THREE.Group();
+      stemGroup.position.set(
+        Math.cos(angle) * radialOffset,
+        -1.35,
+        Math.sin(angle) * radialOffset
+      );
+      // el tallo se inclina levemente hacia afuera, como un ramo real
+      stemGroup.rotation.z = -Math.cos(angle) * radialOffset * 0.22;
+      stemGroup.rotation.x = -Math.sin(angle) * radialOffset * 0.22 + 0.06;
+
+      var stemGeo = new THREE.CylinderGeometry(0.032, 0.045, height, 7);
+      var stem = new THREE.Mesh(stemGeo, stemMat);
+      stem.position.y = height / 2;
+      stemGroup.add(stem);
+
+      if (Math.random() < leafChance){
+        var leaf = makeLeaf(0.9 + Math.random() * 0.3);
+        leaf.position.set(0.1, height * (0.35 + Math.random() * 0.2), 0);
+        leaf.rotation.z = -0.5 + Math.random() * 0.3;
+        leaf.rotation.y = Math.random() * Math.PI;
+        stemGroup.add(leaf);
+      }
+      if (Math.random() < leafChance * 0.7){
+        var leaf2 = makeLeaf(0.8 + Math.random() * 0.3);
+        leaf2.position.set(-0.1, height * (0.55 + Math.random() * 0.2), 0);
+        leaf2.rotation.z = 0.5 + Math.random() * 0.3;
+        leaf2.rotation.y = Math.random() * Math.PI;
+        stemGroup.add(leaf2);
+      }
+
+      flowerNode.position.y = height;
+      // orienta cada flor apuntando hacia afuera/arriba, con variación natural
+      flowerNode.rotation.x = Math.PI / 2 - 0.45 + Math.random() * 0.35;
+      flowerNode.rotation.y = Math.random() * Math.PI * 2;
+      flowerNode.scale.setScalar(flowerScale);
+      stemGroup.add(flowerNode);
+
+      bouquet.add(stemGroup);
+    }
+
+    // capa 1: flores grandes formando el domo principal (varios anillos)
+    var rings = [
+      { count: 1,  radius: 0.0,  height: 3.55, scale: 1.15 },
+      { count: 6,  radius: 0.42, height: 3.35, scale: 1.05 },
+      { count: 8,  radius: 0.78, height: 3.05, scale: 0.95 },
+      { count: 10, radius: 1.12, height: 2.7,  scale: 0.88 },
+      { count: 10, radius: 1.4,  height: 2.35, scale: 0.8 }
+    ];
+
+    rings.forEach(function(ring, ringIndex){
+      for (var i = 0; i < ring.count; i++){
+        var angle = (i / ring.count) * Math.PI * 2 + ringIndex * 0.35 + Math.random() * 0.15;
+        var height = ring.height + (Math.random() - 0.5) * 0.3;
+        var scale = ring.scale * (0.9 + Math.random() * 0.22);
+        addStem(angle, ring.radius, height, makeFlower(1), scale, 0.55);
+      }
+    });
+
+    // capa 2: florecillas de relleno intercaladas, dan densidad "florozo"
+    var fillerCount = 36;
+    for (var f = 0; f < fillerCount; f++){
+      var fAngle = Math.random() * Math.PI * 2;
+      var fRadius = 0.1 + Math.random() * 1.65;
+      var fHeight = 2.15 + Math.random() * 1.65 - fRadius * 0.4;
+      addStem(fAngle, fRadius, Math.max(fHeight, 1.6), makeFillerFlower(), 1, 0.25);
+    }
+
+    // capa 3: manojos de follaje fino asomando entre las flores
+    var sprigCount = 20;
+    for (var g = 0; g < sprigCount; g++){
+      var sAngle = Math.random() * Math.PI * 2;
+      var sRadius = 0.25 + Math.random() * 1.6;
+      var sprig = makeSprig();
+      sprig.position.set(
+        Math.cos(sAngle) * sRadius,
+        1.3 + Math.random() * 1.6 - sRadius * 0.3,
+        Math.sin(sAngle) * sRadius
+      );
+      sprig.rotation.y = Math.random() * Math.PI * 2;
+      sprig.rotation.z = (Math.random() - 0.5) * 0.6;
+      sprig.scale.setScalar(0.85 + Math.random() * 0.5);
+      bouquet.add(sprig);
+    }
+
+    // capa 4: "collar" de follaje que envuelve la base — tapa el hueco
+    // entre el papel y las flores, y le da cuerpo al contorno del ramo
+    var collarCount = 18;
+    for (var c = 0; c < collarCount; c++){
+      var cAngle = (c / collarCount) * Math.PI * 2 + Math.random() * 0.2;
+      var cRadius = 1.55 + Math.random() * 0.35;
+      var collarLeaf = makeLeaf(1.4 + Math.random() * 0.5);
+      collarLeaf.position.set(
+        Math.cos(cAngle) * cRadius,
+        1.55 + Math.random() * 0.35,
+        Math.sin(cAngle) * cRadius
+      );
+      // las hojas se inclinan hacia afuera y hacia abajo, como cayendo
+      // sobre el borde del papel, ocultando el vacío entre flores y envoltorio
+      collarLeaf.rotation.y = cAngle;
+      collarLeaf.rotation.x = 1.1 + Math.random() * 0.3;
+      collarLeaf.rotation.z = (Math.random() - 0.5) * 0.3;
+      bouquet.add(collarLeaf);
+
+      // alguna florecilla de relleno asomando entre el collar de hojas
+      if (Math.random() > 0.4){
+        var collarFlower = makeFillerFlower();
+        collarFlower.position.set(
+          Math.cos(cAngle + 0.15) * (cRadius - 0.15),
+          1.75 + Math.random() * 0.4,
+          Math.sin(cAngle + 0.15) * (cRadius - 0.15)
+        );
+        collarFlower.rotation.x = Math.PI / 2 - 0.5 + Math.random() * 0.4;
+        collarFlower.rotation.y = Math.random() * Math.PI * 2;
+        bouquet.add(collarFlower);
+      }
+    }
+
+    bouquet.position.y = 0.1;
+
+    /* --------- control con mouse / touch --------- */
+    var isDragging = false;
+    var prevX = 0, prevY = 0;
+    var velX = 0.004, velY = 0;
+    var targetRotX = 0.15;
+    var lastInteraction = Date.now();
+
+    function onDown(x, y){
+      isDragging = true;
+      prevX = x; prevY = y;
+      lastInteraction = Date.now();
+    }
+    function onMove(x, y){
+      if (!isDragging) return;
+      var dx = x - prevX;
+      var dy = y - prevY;
+      prevX = x; prevY = y;
+      velX = dx * 0.006;
+      velY = dy * 0.006;
+      bouquet.rotation.y += velX;
+      targetRotX = THREE.MathUtils.clamp(targetRotX + velY, -0.5, 0.7);
+      lastInteraction = Date.now();
+    }
+    function onUp(){
+      isDragging = false;
+      lastInteraction = Date.now();
+    }
+
+    wrap.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', onUp);
+
+    wrap.addEventListener('touchstart', function(e){
+      var t = e.touches[0];
+      onDown(t.clientX, t.clientY);
+    }, { passive: true });
+    wrap.addEventListener('touchmove', function(e){
+      var t = e.touches[0];
+      onMove(t.clientX, t.clientY);
+      e.preventDefault();
+    }, { passive: false });
+    wrap.addEventListener('touchend', onUp);
+
+    function animate(){
+      requestAnimationFrame(animate);
+
+      var idle = Date.now() - lastInteraction > 1500;
+      if (!isDragging){
+        if (idle){
+          bouquet.rotation.y += 0.0022; // giro lento automático
+          velX *= 0.9;
+        } else {
+          bouquet.rotation.y += velX;
+          velX *= 0.92;
+        }
+      }
+      bouquet.rotation.x += (targetRotX - bouquet.rotation.x) * 0.08;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    function onResize(){
+      var w = wrap.clientWidth, h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+  }
+})();
+</script>
+</body>
+</html>
